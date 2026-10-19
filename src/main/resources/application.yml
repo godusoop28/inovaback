@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: inovaback
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    default-property-inclusion: always
+
+server:
+  port: ${PORT:8080}
+  # Render y otros proxies terminan TLS antes de llegar aquí.
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: INFO
