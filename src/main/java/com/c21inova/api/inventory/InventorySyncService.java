@@ -48,7 +48,7 @@ public class InventorySyncService {
 
 	private static final int PAGE_SIZE = 50;
 	private static final int MAX_PAGES = 40;
-	private static final int DETAIL_CONCURRENCY = 4;
+	private static final int DETAIL_CONCURRENCY = 2;
 	private static final int C21_MAX_WRITES_PER_RUN = 120;
 	private static final Duration LEASE = Duration.ofMinutes(15);
 
