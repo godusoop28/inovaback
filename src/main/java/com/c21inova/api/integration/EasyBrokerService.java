@@ -159,6 +159,27 @@ public class EasyBrokerService {
 		return new Page<>(content, Json.integer(pagination, "total"), Json.str(pagination, "next_page") != null);
 	}
 
+	/** Una página del inventario completo (todos los estados: publicada, reservada, no publicada…), tal como lo da la API. */
+	public Page<Map<String, Object>> listAllPropertiesRawPage(int page, int limit) {
+		Map<String, Object> query = new LinkedHashMap<>();
+		query.put("page", page);
+		query.put("limit", limit);
+		Map<String, Object> result = Retry.withRetry(() -> Json.asMap(client.request("GET", "/properties", query, null)), RETRY);
+		List<Map<String, Object>> content = Json.objects(result == null ? null : result.get("content"));
+		Map<String, Object> pagination = result == null ? null : Json.asMap(result.get("pagination"));
+		return new Page<>(content, Json.integer(pagination, "total"), Json.str(pagination, "next_page") != null);
+	}
+
+	/** Detalle completo sin normalizar (imágenes, ubicación como objeto, etc.). */
+	public Map<String, Object> getPropertyRaw(String publicId) {
+		return Retry.withRetry(() -> Json.asMap(client.request("GET", "/properties/" + encode(publicId), null, null)), RETRY);
+	}
+
+	/** Alta de una propiedad (POST /properties). Sin reintentos: un reintento podría duplicarla. */
+	public Map<String, Object> createProperty(Map<String, Object> body) {
+		return Json.asMap(client.request("POST", "/properties", null, body, 30_000));
+	}
+
 	/** Anuncios de cada propiedad en portales (GET /property_integrations). Solo lectura. */
 	public Page<PropertyIntegrations> listPropertyIntegrationsPage(int page, int limit) {
 		Map<String, Object> query = Map.of("page", page, "limit", limit);

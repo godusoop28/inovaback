@@ -105,6 +105,7 @@ class LivePipelineTest {
 		registry.add("INTEGRATION_SECRET", () -> SECRET);
 		registry.add("CRON_SECRET", () -> "cron");
 		registry.add("AUTOMATION_MODE", () -> "live");
+		registry.add("PROPERTY_SYNC_ENABLED", () -> "false");
 		registry.add("EASYBROKER_BASE_URL", () -> fakeUrl + "/eb");
 		registry.add("EASYBROKER_API_KEY", () -> "eb-key");
 		registry.add("MANYCHAT_BASE_URL", () -> fakeUrl);

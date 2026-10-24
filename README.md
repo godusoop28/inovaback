@@ -34,6 +34,12 @@ Es una migración uno a uno de la lógica que vivía en el panel de Next.js (`we
 | `ENABLE_INTERNAL_TESTING` | no | `true` habilita `/api/testing/simulate-lead`. |
 | `JWT_TTL_HOURS` | no | Vigencia del token (por defecto 168 h). |
 | `DB_POOL_SIZE` | no | Conexiones a la base (por defecto 5). |
+| `PROPERTY_SYNC_ENABLED` | no | `false` apaga la sincronización del inventario EasyBroker → CRM → 21Online (encendida por defecto si hay `EASYBROKER_API_KEY`). |
+| `PROPERTY_SYNC_INTERVAL_MINUTES` | no | Cada cuánto corre (por defecto 10). |
+| `C21_CLIENT_ID` / `C21_CLIENT_SECRET` | no | Credencial de la API Externa de 21Online (21Online → Administración y Config → API Externa → Credenciales API, con lectura y escritura de propiedades). Sin ellas el inventario solo se copia al CRM. |
+| `C21_SCOPE` | no | Scopes a pedir en el token, si la credencial los exige (p. ej. `properties:read properties:write`). |
+| `C21_SYNC_ENABLED` | no | `false` deja de enviar a 21Online sin borrar la credencial. |
+| `C21_API_BASE_URL` | no | Por defecto `https://api.21online.lat`. |
 
 ## API
 
@@ -47,6 +53,9 @@ Todas las rutas del panel usan `Authorization: Bearer <token>`. Los roles (`ADMI
 - `POST /api/webhooks/manychat/lead`
 - `POST /api/webhooks/manychat/message` (asistente; responde `handled: "true" | "false"`)
 - `POST /api/webhooks/manychat/property-search`
+
+**Inventario EasyBroker → CRM → 21Online** (`inventory/`). EasyBroker es la fuente de verdad. Cada 10 minutos (o cuando el panel lo pide) se copia todo el inventario a `eb_properties` (todos los estados), se detectan cambios por `updated_at` y las propiedades que ya no existen en EasyBroker quedan como eliminadas con la copia completa de sus datos. A 21Online se envían por la API Externa (OAuth2 client_credentials en `/oauth2/token`, `POST /api/v1/external/Property` hace upsert por `ExternalId` = código EB, así nunca se duplica); al primer envío se emparejan las que ya existían en 21Online por precio + ciudad + recámaras. Las eliminadas se retiran (`StandardStatus: Withdrawn`). Restaurar vuelve a crear la propiedad en EasyBroker con la copia y reutiliza su anuncio de 21Online. Las tablas las crea la migración `20261023120000_eb_property_sync` del panel; el backend aplica el mismo SQL idempotente al arrancar.
+- `GET /api/inventory?deleted=true|false`, `GET /api/inventory/status`, `POST /api/inventory/sync` (ADMIN), `POST /api/inventory/{publicId}/restore` (ADMIN, DIRECCION), `/api/cron/property-sync` (`CRON_SECRET`).
 
 **Crons** (`CRON_SECRET`, GET o POST): `/api/cron/retry-integrations` cada 5 min, `/api/cron/conversations` cada minuto y `/api/cron/property-reports` cada 15 min.
 

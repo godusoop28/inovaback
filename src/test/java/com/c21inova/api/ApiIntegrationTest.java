@@ -102,6 +102,7 @@ class ApiIntegrationTest {
 		registry.add("CRON_SECRET", () -> CRON);
 		registry.add("AUTOMATION_MODE", () -> "shadow");
 		registry.add("SCHEDULER_ENABLED", () -> "false");
+		registry.add("PROPERTY_SYNC_ENABLED", () -> "false");
 		String fakeUrl = "http://127.0.0.1:" + fake.getAddress().getPort();
 		registry.add("OPENAI_BASE_URL", () -> fakeUrl + "/v1");
 		registry.add("OPENAI_API_KEY", () -> "sk-prueba");
