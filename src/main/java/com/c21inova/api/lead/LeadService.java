@@ -293,7 +293,9 @@ public class LeadService {
 		// POST /contact_requests solo responde {"status":"successful"} (nunca un id): el
 		// contacto se localiza después por teléfono + origen + propiedad.
 		String baseMessage = property != null
-				? "Lead recibido desde WhatsApp. El cliente vio la propiedad " + property.publicId() + ".\n\nDato enviado: "
+				? ("CAMPAIGN".equals(interest.assignmentRoute())
+						? "Lead de CAMPAÑA recibido desde WhatsApp. El cliente llegó por el anuncio de la propiedad " + property.publicId() + "."
+						: "Lead recibido desde WhatsApp. El cliente vio la propiedad " + property.publicId() + ".") + "\n\nDato enviado: "
 						+ (input.datosPropiedad() == null ? "" : input.datosPropiedad()) + "\nInterés: " + input.interesCliente() + "\nOrigen: " + MANYCHAT_SOURCE
 				: "Lead recibido desde WhatsApp. Interés: " + input.interesCliente() + ". Ref: " + requestId;
 		String contactRequestMessage = input.conversation() != null

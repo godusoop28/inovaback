@@ -78,8 +78,9 @@ public class ConversationService {
 			if ("wait".equals(session)) metadata.put("duringWait", true);
 			repo.insertMessage(current.id(), companyId, seq, "USER", text, "RECEIVED", dedupeKey, null, metadata.isEmpty() ? null : metadata);
 
-			String campaignCode = current.campaignRef() != null ? null
-					: PropertyReference.extractEasyBrokerCodes(text).stream().findFirst().orElse(null);
+			// El último código EB- que mandó el cliente manda: un código viejo (otra campaña, o mensajes
+			// guardados con la IA apagada) no debe impedir que el anuncio actual cuente como campaña.
+			String campaignCode = PropertyReference.extractEasyBrokerCodes(text).stream().findFirst().orElse(null);
 			Map<String, Object> base = new LinkedHashMap<>();
 			base.put("lastSeq", seq);
 			base.put("lastInboundAt", now);
@@ -87,7 +88,7 @@ public class ConversationService {
 			base.put("isTest", current.isTest() || isTest);
 			if (phone != null && current.phone() == null) base.put("phone", phone);
 			if (name != null) base.put("name", name);
-			if (campaignCode != null) base.put("campaignRef", campaignCode);
+			if (campaignCode != null && !campaignCode.equals(current.campaignRef())) base.put("campaignRef", campaignCode);
 			if ("new_session".equals(session)) base.putAll(sessionOpeningData(current, seq, now));
 
 			if (!handledByAssistant) {
